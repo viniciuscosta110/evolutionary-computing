@@ -1,4 +1,4 @@
-// Solve nquees problem using evolutionary algorithm
+// Solving n queens problem using evolutionary algorithm
 
 #include <iostream>
 #include <cstdlib>
