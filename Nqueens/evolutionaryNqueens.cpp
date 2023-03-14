@@ -237,6 +237,7 @@ void init() {
 }
 
 int main() {
+    srand(time(NULL));
     init();
 
     while(1000 > currentGeneration) {
@@ -247,7 +248,6 @@ int main() {
 
         for(int i = 0; i < POPULATION; i++){
             crossover(rouletteSelecion(), rouletteSelecion());
-
         }
 
         for(int i = 0; i < POPULATION; i++){
