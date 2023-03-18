@@ -220,7 +220,7 @@ void mutate(int individual) {
     Individual newIndividual = newPopulation[individual];
 
     for(int i = 0; i < TABLE; i++){
-        if(rand() % 100 < 5){
+        if(rand() % 100 < MUTATION_RATE){
             newIndividual.cromossome[i] = newIndividual.cromossome[i] == 1 ? 0 : 1;
         }
     }
