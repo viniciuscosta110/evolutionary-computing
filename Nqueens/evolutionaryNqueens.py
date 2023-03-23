@@ -86,6 +86,8 @@ def mutation(individual):
         if random.randint(0, 100) < MUTATION_RATE*100:
             individual.chromosome[i] = 1 - individual.chromosome[i]
 
+    return individual
+
 
 def sort_population():
     population.sort(key=lambda individual: individual.fitness_score, reverse=True)
@@ -117,7 +119,7 @@ def evolve():
         father = roulette_selection()
         new_individual = crossover(mother, father)
         
-        mutation(new_individual)
+        new_individual = mutation(new_individual)
 
         new_individual.fitness_score = new_individual.fitness()
         population.append(new_individual)
