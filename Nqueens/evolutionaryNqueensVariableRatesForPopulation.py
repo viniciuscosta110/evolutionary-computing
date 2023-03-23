@@ -125,12 +125,13 @@ def print_best_individual():
 
 def evolve():
     global currentGeneration, population, currentMutationRate, currentCrossoverRate
+
+    currentCrossoverRate = random.uniform(MIN_CROSSOVER_RATE, MAX_CROSSOVER_RATE)
+    currentMutationRate = random.uniform(MIN_MUTATION_RATE, MAX_MUTATION_RATE)
+
     for i in range(POPULATION):
         mother = roulette_selection()
         father = roulette_selection()
-
-        currentCrossoverRate = random.uniform(MIN_CROSSOVER_RATE, MAX_CROSSOVER_RATE)
-        currentMutationRate = random.uniform(MIN_MUTATION_RATE, MAX_MUTATION_RATE)
 
         newIndividual = crossover(mother, father, currentCrossoverRate)
         newMutatedIndividual = mutation(copy.deepcopy(newIndividual), currentMutationRate) 
@@ -156,7 +157,5 @@ def main():
     print_best_individual()
 
     print("Generation:", currentGeneration-1)
-    print("Mutation rate:", currentMutationRate)
-    print("Crossover rate:", currentCrossoverRate)
 
 main()
