@@ -3,7 +3,7 @@ import copy
 
 N = 8
 TABLE = N * N
-POPULATION = 500
+POPULATION = 1000
 MIN_MUTATION_RATE = 0.01
 MAX_MUTATION_RATE = 0.1
 MIN_CROSSOVER_RATE = 0.5
@@ -146,15 +146,20 @@ def evolve():
     currentGeneration += 1
 
 
-def main():
+def NqueensIndividual():
     global currentGeneration, population, currentMutationRate, currentCrossoverRate
     population = [Individual() for _ in range(POPULATION)]
     currentGeneration = 1
-    while population[0].fitness_score != 28 and currentGeneration <= TOTAL_GENERATIONS:
+    maxFitnessPerGeneration = []
+
+    #population[0].fitness_score != 28
+    while currentGeneration <= TOTAL_GENERATIONS:
         evolve()
+        maxFitnessPerGeneration.append(population[0].fitness_score)
 
-    print_best_individual()
+    """ print_best_individual()
+    print("Generation:", currentGeneration-1) """
 
-    print("Generation:", currentGeneration-1)
+    return population[0], population[0].fitness_score, maxFitnessPerGeneration
 
-main()
+NqueensIndividual()

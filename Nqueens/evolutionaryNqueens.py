@@ -2,7 +2,7 @@ import random
 
 N = 8
 TABLE = N * N
-POPULATION = 100
+POPULATION = 1000
 MUTATION_RATE = 0.01
 TOTAL_GENERATIONS = 100
 
@@ -129,14 +129,20 @@ def evolve():
     current_generation += 1
 
 
-def main():
+def Nqueens():
     global current_generation, population
     population = [Individual() for _ in range(POPULATION)]
     current_generation = 1
-    while population[0].fitness_score != 28 and current_generation <= TOTAL_GENERATIONS:
+    maxFitnessPerGeneration = []
+
+    # population[0].fitness_score != 28 and
+    while current_generation <= TOTAL_GENERATIONS:
         evolve()
+        maxFitnessPerGeneration.append(population[0].fitness_score)
 
-    print("Generation:", current_generation-1)
-    print_best_individual()
+    """ print("Generation:", current_generation-1)
+    print_best_individual()  """
 
-main()
+    return population[0], population[0].fitness_score, maxFitnessPerGeneration
+
+Nqueens()
