@@ -97,7 +97,7 @@ def crossover(parent1, parent2, CROSSOVER_RATE=0.5):
 # Mutation: randomly change a subtree in a chromosome
 def mutate(node, MUTATION_RATE=0.1):
     if random.random() < MUTATION_RATE:
-        if node.op in OPERATORS:
+        if node.op not in OPERATORS:
             if node.left is not None and node.right is not None:
                 if random.random() < 0.5:
                     node.left = Node(random.randint(1,100))
