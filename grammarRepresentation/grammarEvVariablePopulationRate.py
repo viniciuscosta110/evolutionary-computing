@@ -3,10 +3,18 @@ import random
 # Define the problem space
 OPERATORS = ['+', '-', '*', '/']
 TARGET = 10
-POP_SIZE = 100
-MUTATION_RATE = 0.5
-CROSSOVER_RATE = 0.5
-TOTAL_GENERATIONS = 10000
+POP_SIZE = 50
+
+MAX_MUTATION_RATE = 0.5
+MIN_MUTATION_RATE = 0.01
+
+MAX_CROSSOVER_RATE = 0.9
+MIN_CROSSOVER_RATE = 0.4
+
+CURRENT_MUTATION_RATE = 0.01
+CURRENT_CROSSOVER_RATE = 0.5
+
+TOTAL_GENERATIONS = 1000
 CURRENT_GENERATION = 0
 
 # Define the chromosome as a syntax tree
@@ -46,7 +54,7 @@ class Node:
             return str(self.op)
 
 def diversity(population):
-    return len(set([str(node) for node in population]))
+    return len(set([str(node) for node in population]))/1000
 
 # Define the fitness function
 def fitness(node):
@@ -77,14 +85,17 @@ def roulette_wheel_selection(population, n):
     return random.choices(population, probabilities, k=n)
 
 # Crossover: swap subtrees of selected chromosomes
-def crossover(parent1, parent2):
+def crossover(parent1, parent2, CROSSOVER_RATE=0.5):
+    if random.random() > CROSSOVER_RATE:
+        return [parent1, parent2]
+
     child1 = Node(parent1.op, parent2.left, parent1.right)
     child2 = Node(parent2.op, parent1.left, parent2.right)
     return [child1, child2]
 
     
 # Mutation: randomly change a subtree in a chromosome
-def mutate(node):
+def mutate(node, MUTATION_RATE=0.1):
     if random.random() < MUTATION_RATE:
         if node.op in OPERATORS:
             if node.left is not None and node.right is not None:
@@ -106,27 +117,20 @@ population = generate_population(POP_SIZE)
 
 for i in range(TOTAL_GENERATIONS):
     CURRENT_GENERATION += 1
-    if(diversity(population) / POP_SIZE > 0.1):
-      MUTATION_RATE -= 0.01
-      CROSSOVER_RATE += 0.01
-    else:
-      MUTATION_RATE += 0.01
-      CROSSOVER_RATE -= 0.01
+
+    CURRENT_MUTATION_RATE = random.uniform(MIN_MUTATION_RATE, MAX_MUTATION_RATE)
+    CURRENT_CROSSOVER_RATE = random.uniform(MIN_CROSSOVER_RATE, MAX_CROSSOVER_RATE)
 
     selected = select(population, POP_SIZE // 2)
     population = []
+
     for j in range(POP_SIZE // 2):
         parent1 = random.choice(selected)
         parent2 = random.choice(selected)
-        if(random.random() > CROSSOVER_RATE):
-          children = crossover(parent1, parent2)
-          population.extend(children)
-        else:
-            population.append(parent1)
+        children = crossover(parent1, parent2, CURRENT_CROSSOVER_RATE)
+        population.extend(children)
         
-        children = crossover(parent1, parent2)
-        
-    population = [mutate(chromosome) for chromosome in population]
+    population = [mutate(chromosome, CURRENT_CROSSOVER_RATE) for chromosome in population]
 
     # Check if the target has been reached
     for chromosome in population:
@@ -137,9 +141,9 @@ for i in range(TOTAL_GENERATIONS):
             print("")
             print("Solution:", chromosome)
             print("Evaluation:", chromosome.evaluate())
-            print("Diversity:", diversity(population))
-            print("Mutation Rate:", MUTATION_RATE)
-            print("Crossover Rate:", CROSSOVER_RATE)
+            print("Diversity:", diversity(population)*100, "%")
+            print("Mutation Rate:", CURRENT_MUTATION_RATE)
+            print("Crossover Rate:", CURRENT_CROSSOVER_RATE)
             print("Generation:", CURRENT_GENERATION)
             exit(0)
 
