@@ -2,3 +2,5 @@
 
 Y*
 *.exe
+
+__pycache__
