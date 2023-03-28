@@ -137,8 +137,8 @@ def evoluir(populacao):
 
         sort_populacao()
         populacao = populacao[:N_POPULACAO]
-        geracao_atual += 1
-        print(geracao_atual)
+    geracao_atual += 1
+    print(geracao_atual)
 
 
 def main():
