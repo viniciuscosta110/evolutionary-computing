@@ -16,6 +16,7 @@ CURRENT_CROSSOVER_RATE = 0.5
 
 TOTAL_GENERATIONS = 1000
 CURRENT_GENERATION = 1
+maxFitnessPerGeneration = []
 
 # Define the chromosome as a syntax tree
 class Node:
@@ -67,11 +68,10 @@ def generate_population(size):
     for i in range(size):
         root = Node(random.choice(OPERATORS))
         if root.op in OPERATORS:
-            root.left = Node(random.randint(1, 10))
-            root.right = Node(random.randint(1, 10))
-            print(root)
+            root.left = Node(random.randint(1, 100))
+            root.right = Node(random.randint(1, 100))
         else:
-            root.left = Node(random.randint(1, 10))
+            root.left = Node(random.randint(1, 100))
         population.append(root)
     return population
 
@@ -116,21 +116,25 @@ def mutate(node):
 
 
 def checkIfSolution(population):
-     for chromosome in population:
+    global maxFitnessPerGeneration
+
+    for chromosome in population:
         # check if chromosome has a none string value at right and left
         if(str(chromosome.left.op) in OPERATORS or str(chromosome.right.op) in OPERATORS):
             continue
         if fitness(chromosome) == 0 and str(chromosome.left.op) :
-            print("")
+            """     print("")
             print("Solution:", chromosome)
             print("Evaluation:", chromosome.evaluate())
             print("Diversity:", diversity(population)*100, "%")
-            print("Generation:", CURRENT_GENERATION)
-            exit(0)
+            print("Generation:", CURRENT_GENERATION) """
 
+            return population[0], population[0].evaluate(), maxFitnessPerGeneration
 
-def main():
-    global CURRENT_MUTATION_RATE, CURRENT_CROSSOVER_RATE, CURRENT_GENERATION, TOTAL_GENERATIONS, POP_SIZE, TARGET, OPERATORS
+    return 0, 0, maxFitnessPerGeneration
+
+def grammarEvIndividual():
+    global CURRENT_MUTATION_RATE, CURRENT_CROSSOVER_RATE, CURRENT_GENERATION, TOTAL_GENERATIONS, POP_SIZE, TARGET, OPERATORS, maxFitnessPerGeneration
     # Run the genetic algorithm
     population = generate_population(POP_SIZE)
 
@@ -157,11 +161,15 @@ def main():
 
         # sort populatiion by fitness close to target
         population.sort(key=lambda x: abs(x.fitness - TARGET))
+        maxFitnessPerGeneration.append(population[0].fitness)
 
         # Check if the target has been reached
-        checkIfSolution(population)
+        solution, solutionFitness, maxFitnessPerGeneration = checkIfSolution(population)
+        if solution:
+            return solution, solutionFitness, maxFitnessPerGeneration
 
     print("Failed to find a solution")
+    return population[0], population[0].evaluate(), maxFitnessPerGeneration
 
 
-main()
+grammarEvIndividual()

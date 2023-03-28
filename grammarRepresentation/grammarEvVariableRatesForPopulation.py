@@ -3,7 +3,7 @@ import random
 # Define the problem space
 OPERATORS = ['+', '-', '*', '/']
 TARGET = 10
-POP_SIZE = 50
+POP_SIZE = 100
 
 MAX_MUTATION_RATE = 0.5
 MIN_MUTATION_RATE = 0.01
@@ -15,7 +15,8 @@ CURRENT_MUTATION_RATE = 0.01
 CURRENT_CROSSOVER_RATE = 0.5
 
 TOTAL_GENERATIONS = 1000
-CURRENT_GENERATION = 0
+CURRENT_GENERATION = 1
+maxFitnessPerGeneration = []
 
 # Define the chromosome as a syntax tree
 class Node:
@@ -66,10 +67,10 @@ def generate_population(size):
     for i in range(size):
         root = Node(random.choice(OPERATORS))
         if root.op in OPERATORS:
-            root.left = Node(random.randint(1, 10))
-            root.right = Node(random.randint(1, 10))
+            root.left = Node(random.randint(1, 100))
+            root.right = Node(random.randint(1, 100))
         else:
-            root.left = Node(random.randint(1, 10))
+            root.left = Node(random.randint(1, 100))
         population.append(root)
     return population
 
@@ -112,39 +113,46 @@ def mutate(node, MUTATION_RATE=0.1):
     return node
 
 
-# Run the genetic algorithm
-population = generate_population(POP_SIZE)
+def grammarEvPopulation():
+    global CURRENT_MUTATION_RATE, CURRENT_CROSSOVER_RATE, CURRENT_GENERATION, TOTAL_GENERATIONS, POP_SIZE, TARGET, OPERATORS, maxFitnessPerGeneration
+    # Run the genetic algorithm
+    population = generate_population(POP_SIZE)
 
-for i in range(TOTAL_GENERATIONS):
-    CURRENT_GENERATION += 1
+    for i in range(TOTAL_GENERATIONS):
+        CURRENT_GENERATION += 1
 
-    CURRENT_MUTATION_RATE = random.uniform(MIN_MUTATION_RATE, MAX_MUTATION_RATE)
-    CURRENT_CROSSOVER_RATE = random.uniform(MIN_CROSSOVER_RATE, MAX_CROSSOVER_RATE)
+        CURRENT_MUTATION_RATE = random.uniform(MIN_MUTATION_RATE, MAX_MUTATION_RATE)
+        CURRENT_CROSSOVER_RATE = random.uniform(MIN_CROSSOVER_RATE, MAX_CROSSOVER_RATE)
 
-    selected = select(population, POP_SIZE // 2)
-    population = []
+        selected = select(population, POP_SIZE // 2)
+        population = []
 
-    for j in range(POP_SIZE // 2):
-        parent1 = random.choice(selected)
-        parent2 = random.choice(selected)
-        children = crossover(parent1, parent2, CURRENT_CROSSOVER_RATE)
-        population.extend(children)
-        
-    population = [mutate(chromosome, CURRENT_CROSSOVER_RATE) for chromosome in population]
+        for j in range(POP_SIZE // 2):
+            parent1 = random.choice(selected)
+            parent2 = random.choice(selected)
+            children = crossover(parent1, parent2, CURRENT_CROSSOVER_RATE)
+            population.extend(children)
+            
+        population = [mutate(chromosome, CURRENT_CROSSOVER_RATE) for chromosome in population]
+        population.sort(key=fitness)
+        maxFitnessPerGeneration.append(fitness(population[0]))
 
-    # Check if the target has been reached
-    for chromosome in population:
-        # check if chromosome has a none string value at right and left
-        if(str(chromosome.left.op) in OPERATORS or str(chromosome.right.op) in OPERATORS):
-          continue
-        if fitness(chromosome) == 0 and str(chromosome.left.op) :
-            print("")
-            print("Solution:", chromosome)
-            print("Evaluation:", chromosome.evaluate())
-            print("Diversity:", diversity(population)*100, "%")
-            print("Mutation Rate:", CURRENT_MUTATION_RATE)
-            print("Crossover Rate:", CURRENT_CROSSOVER_RATE)
-            print("Generation:", CURRENT_GENERATION)
-            exit(0)
+        # Check if the target has been reached
+        for chromosome in population:
+            # check if chromosome has a none string value at right and left
+            if(str(chromosome.left.op) in OPERATORS or str(chromosome.right.op) in OPERATORS):
+                continue
+            if fitness(chromosome) == 0 and str(chromosome.left.op) :
+                """ print("")
+                print("Solution:", chromosome)
+                print("Evaluation:", chromosome.evaluate())
+                print("Diversity:", diversity(population)*100, "%")
+                print("Mutation Rate:", CURRENT_MUTATION_RATE)
+                print("Crossover Rate:", CURRENT_CROSSOVER_RATE)
+                print("Generation:", CURRENT_GENERATION)
+                exit(0) """
 
-print("Failed to find a solution")
+                return population[0], population[0].evaluate(), maxFitnessPerGeneration 
+
+    print("Failed to find a solution")
+    return population[0], population[0].evaluate(), maxFitnessPerGeneration

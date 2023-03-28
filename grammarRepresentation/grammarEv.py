@@ -3,8 +3,9 @@ import random
 # Define the problem space
 OPERATORS = ['+', '-', '*', '/']
 TARGET = 10
-POP_SIZE = 10000
-MUTATION_RATE = 0.5
+POP_SIZE = 100
+TOTAL_GENERATIONS = 1000
+MUTATION_RATE = 0.1
 
 # Define the chromosome as a syntax tree
 class Node:
@@ -52,10 +53,10 @@ def generate_population(size):
     for i in range(size):
         root = Node(random.choice(OPERATORS))
         if root.op in OPERATORS:
-            root.left = Node(random.randint(1, 10))
-            root.right = Node(random.randint(1, 10))
+            root.left = Node(random.randint(1, 100))
+            root.right = Node(random.randint(1, 100))
         else:
-            root.left = Node(random.randint(1, 10))
+            root.left = Node(random.randint(1, 100))
         population.append(root)
     return population
 
@@ -89,25 +90,37 @@ def mutate(node):
     return node
 
 
-# Run the genetic algorithm
-population = generate_population(POP_SIZE)
-for i in range(100):
-    selected = select(population, POP_SIZE // 2)
-    population = []
-    for j in range(POP_SIZE // 2):
-        parent1 = random.choice(selected)
-        parent2 = random.choice(selected)
-        children = crossover(parent1, parent2)
-        population.extend(children)
-    population = [mutate(chromosome) for chromosome in population]
-    
-    # Check if the target has been reached
-    for chromosome in population:
-        """ check if chromosome has a none string value at right and left """
-        if(str(chromosome.left.op) in OPERATORS or str(chromosome.right.op) in OPERATORS):
-          continue
-        if fitness(chromosome) == 0 and str(chromosome.left.op) :
-            print(chromosome)
-            exit(0)
+def grammarEv():
+    # Run the genetic algorithm
+    maxFitnessPerGeneration = []
 
-print("Failed to find a solution")
+    population = generate_population(POP_SIZE)
+
+    for i in range(TOTAL_GENERATIONS):
+        selected = select(population, POP_SIZE // 2)
+        population = []
+        for j in range(POP_SIZE // 2):
+            parent1 = random.choice(selected)
+            parent2 = random.choice(selected)
+            children = crossover(parent1, parent2)
+            population.extend(children)
+        population = [mutate(chromosome) for chromosome in population]
+        population.sort(key=fitness)
+        
+        maxFitnessPerGeneration.append(fitness(population[0]))
+        
+        # Check if the target has been reached
+        for chromosome in population:
+            """ check if chromosome has a none string value at right and left """
+            if(str(chromosome.left.op) in OPERATORS or str(chromosome.right.op) in OPERATORS):
+                continue
+            if fitness(chromosome) == 0 and str(chromosome.left.op) :
+                """ print(chromosome)
+                print(maxFitnessPerGeneration[0])
+                exit(0) """
+                return population[0], population[0].evaluate(), maxFitnessPerGeneration
+
+    print("Failed to find a solution")
+    return population[0], population[0].evaluate(), maxFitnessPerGeneration 
+
+grammarEv()
