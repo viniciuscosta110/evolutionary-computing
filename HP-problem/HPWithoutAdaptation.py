@@ -1,13 +1,15 @@
 import random
 import math
+import copy
 
-GERACAO = 2000
+GERACAO = 100
 N_POPULACAO = 1000
 TAXA_MUTACAO = 0.01
 VARIACOES = ['C','B','D','E']
 CADEIA = "HPHPHPHPHHPHHPPH"
 
 populacao = []
+maxFitnessPerGeneration = []
 geracao_atual = 1
 
 class individuo:
@@ -117,12 +119,14 @@ def roulette_selection(populacao):
     for individual in populacao:
         soma_partial += individual.fitness
         if soma_partial >= r:
-            return individual
+            return copy.deepcopy(individual)
         
-    return populacao[-1]
+    return copy.deepcopy(populacao[0])
 
 def evoluir(populacao):
     global geracao_atual
+    global maxFitnessPerGeneration
+    
     for i in range(len(populacao)):
         mae = roulette_selection(populacao)
         pai = roulette_selection(populacao)
@@ -137,20 +141,23 @@ def evoluir(populacao):
 
         sort_populacao()
         populacao = populacao[:N_POPULACAO]
+        
+    maxFitnessPerGeneration.append(populacao[0].fitness)
     geracao_atual += 1
-    print(geracao_atual)
 
 
 def main():
     global populacao
     global geracao_atual
+    global maxFitnessPerGeneration
+
     populacao = gerar_populacao()
     while(geracao_atual <= GERACAO):
         evoluir(populacao)
 
-    print("É AGORA!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-
+    """ print("É AGORA!!!!!!!!!!!!!!!!!!!!!!!!!!!!!") """
+    return populacao[0], populacao[0].fitness, maxFitnessPerGeneration
    # for rapaz in populacao:
     #    print(rapaz.fitness,rapaz.pontos)
-    print(populacao[0].fitness,populacao[0].pontos)
+    """ print(populacao[0].fitness,populacao[0].pontos) """
 main()
