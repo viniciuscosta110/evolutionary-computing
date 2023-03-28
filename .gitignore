@@ -2,5 +2,6 @@
 
 Y*
 *.exe
+*.rar
 
 __pycache__
