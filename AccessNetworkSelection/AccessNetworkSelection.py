@@ -83,7 +83,7 @@ def Mutation(individual):
 def GeneratePopulation():
   population = []
 
-  while len(population) < POPULATION_SIZE:
+  while len(population) <= POPULATION_SIZE:
     individual = Individual()
 
     if individual.IsValid():
@@ -111,12 +111,10 @@ def Evolve():
       child = Crossover(parent1, parent2)
       child = Mutation(child)
 
+      child.fitness_score = child.fitness()
+
       if(child.IsValid()):
-        child.fitness_score = child.fitness()
-      else:
-        child.fitness_score = np.inf
-    
-      population.append(child)
+        population.append(child)
 
     population.sort(key=lambda x: x.fitness_score)
     population = population[:POPULATION_SIZE]
