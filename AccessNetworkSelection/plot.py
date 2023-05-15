@@ -20,8 +20,8 @@ def main():
   ax1.set_title('Without adaptation')
   ax1.set_ylabel('Fitness')
   ax1.set_xlabel('Generations')
-  plt.subplots_adjust(bottom=0.2)
-  ax1.text(0.5, -0.2, f'Best chromossome: {best_individual.chromosome}\n Fitness = {"%.2f" % best_value} \n Last Generation = {max_fitness_length} ', horizontalalignment='center', verticalalignment='center', transform=ax1.transAxes)
+  plt.subplots_adjust(bottom=0.3)
+  ax1.text(0.5, -0.3, f'Best chromossome: [{best_individual.chromosome[0]}], [{best_individual.chromosome[1]}],\n [{best_individual.chromosome[2]}], [{best_individual.chromosome[3]}]\n Fitness = {"%.8f" % best_value} \n Last Generation = {max_fitness_length} ', horizontalalignment='center', verticalalignment='center', transform=ax1.transAxes)
   
   plt.show()
 

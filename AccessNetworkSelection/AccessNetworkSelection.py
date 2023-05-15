@@ -1,6 +1,6 @@
 from utils import *
 import random
-
+import numpy as np
 
 CHROMOSOME_LENGHT = 4
 
@@ -8,7 +8,7 @@ MUTATION_RATE = 0.02
 MUTATION_RANGE = 10
 
 POPULATION_SIZE = 10
-TOTAL_GENERATIONS = 50
+TOTAL_GENERATIONS = 100
 
 GSM_VOICE_LIMITS = [0, 125]
 GSM_DATA_LIMITS = [0, 30]
@@ -18,6 +18,8 @@ WCDMA_DATA_LIMITS = [0, 80]
 
 VOICES_LIMIT = 275
 DATA_LIMIT = 110
+
+DESIRED_COST = 0.0
 
 population = []
 currentGeneration = 1
@@ -30,12 +32,11 @@ class Individual:
     self.fitness_score = self.fitness()
 
   def InitializeChromosome(self):
-    # Generate random values for the chromosome within the limits and with 4 decimal places
-    GSMvoice = round(random.uniform(GSM_VOICE_LIMITS[0], GSM_VOICE_LIMITS[1]), 2)
-    GSMdata = round(random.uniform(GSM_DATA_LIMITS[0], GSM_DATA_LIMITS[1]), 2)
+    GSMvoice = random.uniform(GSM_VOICE_LIMITS[0], GSM_VOICE_LIMITS[1])
+    GSMdata = random.uniform(GSM_DATA_LIMITS[0], GSM_DATA_LIMITS[1])
     
-    WCDMAvoice = round(random.uniform(WCDMA_VOICE_LIMITS[0], WCDMA_VOICE_LIMITS[1]), 2)
-    WCDMAdata = round(random.uniform(WCDMA_DATA_LIMITS[0], WCDMA_DATA_LIMITS[1]), 2)
+    WCDMAvoice = random.uniform(WCDMA_VOICE_LIMITS[0], WCDMA_VOICE_LIMITS[1])
+    WCDMAdata = random.uniform(WCDMA_DATA_LIMITS[0], WCDMA_DATA_LIMITS[1])
 
     return [GSMvoice, WCDMAvoice, GSMdata, WCDMAdata]
 
@@ -68,7 +69,7 @@ class Individual:
 def Crossover(parent1, parent2):
   child = Individual()
   for i in range(0, CHROMOSOME_LENGHT):
-    child.chromosome[i] = round((parent1.chromosome[i] + parent2.chromosome[i]) / 2, 2)
+    child.chromosome[i] = (parent1.chromosome[i] + parent2.chromosome[i]) / 2
 
   return child
 
@@ -76,7 +77,6 @@ def Mutation(individual):
   for i in range(0, CHROMOSOME_LENGHT):
     if random.random() < MUTATION_RATE:
       individual.chromosome[i] += random.gauss(-MUTATION_RANGE, MUTATION_RANGE)
-      individual.chromosome[i] = round(individual.chromosome[i], 2)
 
   return individual
 
@@ -104,17 +104,19 @@ def roulette_selection():
 def Evolve():
   global population, currentGeneration, bestFitnessOfEachGeneration
 
-  while population[0].fitness_score > 1 and currentGeneration < TOTAL_GENERATIONS:
+  while population[0].fitness_score >= DESIRED_COST and currentGeneration < TOTAL_GENERATIONS:
     while len(population) < POPULATION_SIZE*2:
       parent1, parent2 = roulette_selection()
 
       child = Crossover(parent1, parent2)
       child = Mutation(child)
 
-      child.fitness_score = child.fitness()
-
       if(child.IsValid()):
-        population.append(child)
+        child.fitness_score = child.fitness()
+      else:
+        child.fitness_score = np.inf
+    
+      population.append(child)
 
     population.sort(key=lambda x: x.fitness_score)
     population = population[:POPULATION_SIZE]
@@ -127,7 +129,7 @@ def PrintBestIndividual():
 
   bestIndividual = population[0]
   print("Chromosome: ", bestIndividual.chromosome)
-  print("Fitness: ", '%.2f' % bestIndividual.fitness_score)
+  print("Fitness: ", "%.8f" % bestIndividual.fitness_score)
   print("Current Generation: ", currentGeneration, "\n")
 
 def AccessNetworkSelection():
@@ -140,7 +142,7 @@ def AccessNetworkSelection():
 
   if(population[0].fitness_score < 0):
     print("Chromosome: ", population[0].chromosome)
-    print("Fitness: ", '%.2f' % population[0].fitness_score)
+    print("Fitness: ", "%.8f" % population[0].fitness_score)
     print("Current Generation: ", currentGeneration)
     return population[0], population[0].fitness_score, bestFitnessOfEachGeneration
 
