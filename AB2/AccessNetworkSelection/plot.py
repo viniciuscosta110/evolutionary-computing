@@ -17,7 +17,6 @@ def main():
   # x axis will be integers
   ax1.xaxis.set_major_locator(plt.MaxNLocator(integer=True))
 
-  ax1.set_title('Without adaptation')
   ax1.set_ylabel('Fitness')
   ax1.set_xlabel('Generations')
   plt.subplots_adjust(bottom=0.3)

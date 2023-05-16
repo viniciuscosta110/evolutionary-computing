@@ -143,7 +143,9 @@ def main():
         print(seq)
     print(populacao[0].calcular_fitness(True))
     plt.plot(range(GERACAO), melhores_individuos, color='Blue')
-    plt.savefig('Taylor Swift on top')
+    plt.xlabel('Gerações')
+    plt.ylabel('Fitness')
+    plt.savefig('Taylor_Swift_on_top')
     
 
 main()
