@@ -3,7 +3,7 @@ import math
 import copy
 
 GERACAO = 100
-N_POPULACAO = 1000
+N_POPULACAO = 20
 TAXA_MUTACAO = 0.01
 VARIACOES = ['C','B','D','E']
 CADEIA = "HPHPHPHPHHPHHPPH"
@@ -39,9 +39,9 @@ class individuo:
             pontoy = pontos[i-1][1]
 
             if(self.orientacao[i-1] == 'C'):
-                pontoy += 1
-            elif(self.orientacao[i-1] == 'B'):
                 pontoy -= 1
+            elif(self.orientacao[i-1] == 'B'):
+                pontoy += 1
             if(self.orientacao[i-1] == 'D'):
                 pontox += 1
             elif(self.orientacao[i-1] == 'E'):
@@ -55,7 +55,7 @@ class individuo:
         for i in range(0,len(self.pontos)):
             for j in range(0,len(self.pontos)):
                 if(i != j):
-                    if(self.pontos[i] == self.pontos[j]):
+                    if(self.pontos[i][0] == self.pontos[j][0] and self.pontos[i][1] == self.pontos[j][1]):
                         return True
         return False
 
@@ -81,11 +81,20 @@ class individuo:
 def sort_populacao():
     populacao.sort(key=lambda individual: individual.fitness, reverse=True)
 
-def crosoover(pai,mae):
+def crossover(pai,mae):
     novo = individuo()
     ponto_corte = random.randint(0,len(CADEIA))
-    novo.orientacao[:ponto_corte] = mae.orientacao[:ponto_corte]
-    novo.orientacao[ponto_corte:] = pai.orientacao[ponto_corte:]
+    ponto_corte2 = random.randint(0,len(CADEIA))
+
+    while ponto_corte2 == ponto_corte:
+        ponto_corte2 = random.randint(0,len(CADEIA))
+
+    if ponto_corte > ponto_corte2:
+        ponto_corte, ponto_corte2 = ponto_corte2, ponto_corte
+    
+    novo.orientacao = (mae.orientacao[:ponto_corte] + 
+                      pai.orientacao[ponto_corte:ponto_corte2] + 
+                      mae.orientacao[ponto_corte2:])
 
     novo.recalcular()
 
@@ -93,11 +102,14 @@ def crosoover(pai,mae):
 
 def mutacao(novo):
     for i in range(0,len(CADEIA)):
-        if random.random() < TAXA_MUTACAO:
+        if random.randint(0, 100) < TAXA_MUTACAO*100:
+            orientacao = novo.orientacao[i]
             novo.orientacao[i] = VARIACOES[random.randint(0,3)]
+
+            while orientacao == novo.orientacao[i]:
+                novo.orientacao[i] = VARIACOES[random.randint(0,3)]
     
     novo.recalcular()
-
     return novo
 
 def gerar_populacao():
@@ -131,20 +143,69 @@ def evoluir(populacao):
         mae = roulette_selection(populacao)
         pai = roulette_selection(populacao)
 
-        novo = crosoover(pai,mae)
+        novo = crossover(pai,mae)
         novo = mutacao(novo)
 
-        if(novo.monstro):
-            populacao.append(mae)
-        else:
-            populacao.append(novo)
-
-        sort_populacao()
+        while(novo.monstro):
+            novo = crossover(pai,mae)
+            novo = mutacao(novo)
+            
+        populacao.append(novo)
         populacao = populacao[:N_POPULACAO]
         
     maxFitnessPerGeneration.append(populacao[0].fitness)
     geracao_atual += 1
 
+def para_por_igualdade(cacheMelhorEnergia):
+    # Caso os últimos 50 sejam o mesmo, parar
+    tamanho = len(cacheMelhorEnergia)
+    if(tamanho < 5): return False
+
+    for i in range(tamanho-1, tamanho-50, -1):
+        if(cacheMelhorEnergia[i] != cacheMelhorEnergia[i-1]):
+            return False
+    
+    return True
+        
+    
+def HP():
+    global populacao
+    global geracao_atual
+    global maxFitnessPerGeneration
+
+    populacao = gerar_populacao()
+    pararPorFaltaDeMelhoria = False
+    cacheMelhorEnergia = [0]
+
+    while(geracao_atual <= GERACAO and not pararPorFaltaDeMelhoria):
+        evoluir(populacao)
+        cacheMelhorEnergia.append(populacao[0].fitness)
+        pararPorFaltaDeMelhoria = para_por_igualdade(cacheMelhorEnergia)
+    
+    sort_populacao()
+    print("Melhor individuo encontrado: ")
+    print("Orientacao: ", populacao[0].orientacao)
+    print("Energia: ", populacao[0].fitness)
+    print("Geracao: ", geracao_atual)
+
+    
+    
+    # Visualize the protein in 2D grid if needed
+    min_x = min(p[0] for p in populacao[0].pontos)
+    max_x = max(p[0] for p in populacao[0].pontos)
+    min_y = min(p[1] for p in populacao[0].pontos)
+    max_y = max(p[1] for p in populacao[0].pontos)
+    
+    grid_width = max_x - min_x + 1
+    grid_height = max_y - min_y + 1
+    grid = [[' ' for _ in range(grid_width)] for _ in range(grid_height)]
+    
+    for i, (x, y) in enumerate(populacao[0].pontos):
+        grid[y - min_y][x - min_x] = CADEIA[i]
+    
+    print("\nVisualização 2D:")
+    for row in grid:
+        print(''.join(row))
 
 def main():
     global populacao
@@ -152,12 +213,7 @@ def main():
     global maxFitnessPerGeneration
 
     populacao = gerar_populacao()
-    while(geracao_atual <= GERACAO):
-        evoluir(populacao)
+    while populacao[0].fitness != 16:
+        HP()
 
-    """ print("É AGORA!!!!!!!!!!!!!!!!!!!!!!!!!!!!!") """
-    return populacao[0], populacao[0].fitness, maxFitnessPerGeneration
-   # for rapaz in populacao:
-    #    print(rapaz.fitness,rapaz.pontos)
-    """ print(populacao[0].fitness,populacao[0].pontos) """
 main()
